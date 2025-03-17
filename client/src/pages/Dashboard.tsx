@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import TaskForm from '@/components/tasks/TaskForm';
@@ -11,67 +10,24 @@ import { Clock } from 'lucide-react';
 // Generate a unique ID
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
-// Mock data for initial tasks
-const mockTasks: Task[] = [
-  {
-    id: generateId(),
-    title: 'Complete project proposal',
-    description: 'Finalize the project proposal document and send it to the client for review.',
-    priority: 9,
-    completed: false,
-    createdAt: new Date(Date.now() - 86400000), // 1 day ago
-  },
-  {
-    id: generateId(),
-    title: 'Schedule team meeting',
-    description: 'Set up a meeting with the development team to discuss project milestones.',
-    priority: 6,
-    completed: false,
-    createdAt: new Date(Date.now() - 172800000), // 2 days ago
-  },
-  {
-    id: generateId(),
-    title: 'Research competitor products',
-    description: 'Analyze similar products in the market to identify strengths and weaknesses.',
-    priority: 4,
-    completed: true,
-    createdAt: new Date(Date.now() - 259200000), // 3 days ago
-  },
-  {
-    id: generateId(),
-    title: 'Update personal portfolio',
-    description: 'Add recent projects to portfolio website and update skills section.',
-    priority: 3,
-    completed: false,
-    createdAt: new Date(Date.now() - 345600000), // 4 days ago
-  },
-];
-
 const Dashboard = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Load tasks from localStorage on component mount
   useEffect(() => {
-    // Simulate loading data from an API
-    const loadTasks = async () => {
-      setIsLoading(true);
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setTasks(mockTasks);
-      } catch (error) {
-        toast({
-          title: "Error loading tasks",
-          description: "There was a problem loading your tasks. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    const storedTasks = localStorage.getItem('tasks');
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
+    }
+    setIsLoading(false);
+  }, []);
 
-    loadTasks();
-  }, [toast]);
+  // Save tasks to localStorage whenever tasks change
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
   const handleAddTask = (newTask: Omit<Task, 'id' | 'createdAt'>) => {
     const task: Task = {
@@ -81,7 +37,7 @@ const Dashboard = () => {
     };
 
     setTasks(prevTasks => [task, ...prevTasks]);
-    
+
     toast({
       title: "Task added",
       description: "Your task has been added successfully.",
@@ -94,7 +50,7 @@ const Dashboard = () => {
         task.id === updatedTask.id ? updatedTask : task
       )
     );
-    
+
     toast({
       title: "Task updated",
       description: "Your task has been updated successfully.",
@@ -103,7 +59,7 @@ const Dashboard = () => {
 
   const handleDeleteTask = (id: string) => {
     setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
-    
+
     toast({
       title: "Task deleted",
       description: "Your task has been deleted successfully.",

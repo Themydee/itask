@@ -24,11 +24,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const links = [
     { href: '/dashboard', label: 'Dashboard' },
-    // Add more navigation links as needed
+
   ];
 
   const handleLogout = () => {
-    // Implement logout functionality
     window.location.href = '/';
   };
 
@@ -47,8 +46,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <Menu className="h-5 w-5" />
             </Button>
             <Link to="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">P</div>
-              <span className="font-medium text-lg hidden sm:inline-block">PriorityScale</span>
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">iT</div>
+              <span className="font-medium text-lg hidden sm:inline-block">iTask</span>
             </Link>
           </div>
 
@@ -112,8 +111,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         >
           <div className="flex flex-col space-y-6">
             <Link to="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">P</div>
-              <span className="font-medium text-lg">PriorityScale</span>
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">iT</div>
+              <span className="font-medium text-lg">iTask</span>
             </Link>
             <nav className="flex flex-col space-y-4">
               {links.map(link => (
@@ -142,7 +141,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {/* Footer */}
       <footer className="border-t py-4 bg-muted/30">
         <div className="container text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} PriorityScale. All rights reserved.
+          © {new Date().getFullYear()} iTask. All rights reserved.
         </div>
       </footer>
     </div>

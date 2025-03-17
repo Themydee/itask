@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,35 +25,68 @@ const AuthForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+  
     try {
-      // This is where you would integrate with your authentication service
-      // For now, we'll mock a successful authentication
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
       if (mode === 'register') {
+        // Check if the email is already registered
+        const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
+        const userExists = existingUsers.some((user: { email: string }) => user.email === email);
+  
+        if (userExists) {
+          throw new Error('Email is already registered');
+        }
+  
+        // Save the new user to localStorage
+        const newUser = { name, email, password };
+        localStorage.setItem('users', JSON.stringify([...existingUsers, newUser]));
+  
         toast({
-          title: "Account created",
-          description: "Your account has been created successfully.",
+          title: 'Account created',
+          description: 'Your account has been created successfully.',
         });
+  
+        // Switch to login mode after registration
+        setMode('login');
+        setEmail('');
+        setPassword('');
+        setName('');
       } else {
+        // Login mode: Validate user credentials
+        const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
+        const user = existingUsers.find(
+          (user: { email: string; password: string }) =>
+            user.email === email && user.password === password
+        );
+  
+        if (!user) {
+          throw new Error('Invalid email or password');
+        }
+  
+        // Save the logged-in user's data to localStorage
+        localStorage.setItem('loggedInUser', JSON.stringify(user));
+  
         toast({
-          title: "Welcome back",
-          description: "You have been logged in successfully.",
+          title: 'Welcome back',
+          description: 'You have been logged in successfully.',
         });
+  
+        // Navigate to dashboard on success
+        window.location.href = '/dashboard';
       }
-      
-      // Navigate to dashboard on success
-      window.location.href = '/dashboard';
-    } catch (error) {
+    } catch (error: any) {
       toast({
-        title: "Authentication failed",
-        description: "Please check your credentials and try again.",
-        variant: "destructive",
+        title: 'Authentication failed',
+        description: error.message || 'Please check your credentials and try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('loggedInUser');
+    window.location.href = '/';
   };
 
   return (
