@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { CheckCircle, Clock, Edit, Trash, X } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -28,14 +27,17 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
   const [editedDescription, setEditedDescription] = useState(task.description || '');
   const [editedPriority, setEditedPriority] = useState(task.priority);
 
+  // Toggle task completion
   const handleToggleComplete = () => {
     onUpdate({ ...task, completed: !task.completed });
   };
 
+  // Edit mode toggle
   const handleEdit = () => {
     setIsEditing(true);
   };
 
+  // Save edited task
   const handleSave = () => {
     onUpdate({
       ...task,
@@ -46,6 +48,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
     setIsEditing(false);
   };
 
+  // Cancel editing
   const handleCancel = () => {
     setEditedTitle(task.title);
     setEditedDescription(task.description || '');
@@ -53,6 +56,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
     setIsEditing(false);
   };
 
+  // Format date for display
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -62,6 +66,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
     }).format(date);
   };
 
+  // Get priority label and color
   const getPriorityLabel = (priority: number) => {
     if (priority <= 3) return { label: 'Low', color: 'bg-green-100 text-green-800 border-green-200' };
     if (priority <= 7) return { label: 'Medium', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' };
@@ -69,6 +74,18 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
   };
 
   const priorityInfo = getPriorityLabel(task.priority);
+
+  // Generate Google Calendar event link
+  const getGoogleCalendarLink = (task: Task) => {
+    const startDate = new Date(task.createdAt).toISOString().replace(/-|:|\.\d+/g, '');
+    const endDate = new Date(new Date(task.createdAt).getTime() + 60 * 60 * 1000)
+      .toISOString()
+      .replace(/-|:|\.\d+/g, '');
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+      task.title
+    )}&details=${encodeURIComponent(task.description || '')}&dates=${startDate}/${endDate}`;
+  };
 
   return (
     <Card className={cn(
@@ -136,35 +153,49 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdate, onDelete }) => {
           </div>
         )}
       </CardContent>
-      
-      <CardFooter className="p-3 pt-0 flex justify-end gap-2 border-t bg-muted/30">
-        {isEditing ? (
-          <>
-            <Button size="sm" variant="outline" onClick={handleCancel}>
-              <X className="h-4 w-4 mr-1" /> Cancel
-            </Button>
-            <Button size="sm" onClick={handleSave}>
-              <CheckCircle className="h-4 w-4 mr-1" /> Save
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button 
-              size="icon" 
-              variant="outline" 
-              onClick={handleToggleComplete}
-              className={task.completed ? "text-green-600" : "text-muted-foreground"}
-            >
-              <CheckCircle className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="outline" onClick={handleEdit}>
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="outline" className="text-destructive" onClick={() => onDelete(task.id)}>
-              <Trash className="h-4 w-4" />
-            </Button>
-          </>
-        )}
+
+      {/* Footer Section */}
+      <CardFooter className="p-3 pt-0 flex justify-between items-center border-t bg-muted/30">
+        {/* Add to Calendar Link */}
+        <a
+          href={getGoogleCalendarLink(task)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline text-sm flex items-center gap-1"
+        >
+          📅 Add to Calendar
+        </a>
+
+        {/* Task Actions */}
+        <div className="flex gap-2">
+          {isEditing ? (
+            <>
+              <Button size="sm" variant="outline" onClick={handleCancel}>
+                <X className="h-4 w-4 mr-1" /> Cancel
+              </Button>
+              <Button size="sm" onClick={handleSave}>
+                <CheckCircle className="h-4 w-4 mr-1" /> Save
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button 
+                size="icon" 
+                variant="outline" 
+                onClick={handleToggleComplete}
+                className={task.completed ? "text-green-600" : "text-muted-foreground"}
+              >
+                <CheckCircle className="h-4 w-4" />
+              </Button>
+              <Button size="icon" variant="outline" onClick={handleEdit}>
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button size="icon" variant="outline" className="text-destructive" onClick={() => onDelete(task.id)}>
+                <Trash className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+        </div>
       </CardFooter>
     </Card>
   );
