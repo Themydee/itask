@@ -15,19 +15,27 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Load tasks from localStorage on component mount
+  // Get the logged-in user from localStorage
+  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+  const userEmail = loggedInUser?.email;
+
+  // Load tasks for the logged-in user on component mount
   useEffect(() => {
-    const storedTasks = localStorage.getItem('tasks');
-    if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
+    if (userEmail) {
+      const storedTasks = localStorage.getItem(`tasks_${userEmail}`);
+      if (storedTasks) {
+        setTasks(JSON.parse(storedTasks));
+      }
     }
     setIsLoading(false);
-  }, []);
+  }, [userEmail]);
 
-  // Save tasks to localStorage whenever tasks change
+  // Save tasks for the logged-in user whenever tasks change
   useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    if (userEmail) {
+      localStorage.setItem(`tasks_${userEmail}`, JSON.stringify(tasks));
+    }
+  }, [tasks, userEmail]);
 
   const handleAddTask = (newTask: Omit<Task, 'id' | 'createdAt'>) => {
     const task: Task = {
