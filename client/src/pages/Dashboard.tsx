@@ -16,17 +16,15 @@ const Dashboard = () => {
   const { toast } = useToast();
 
   // Get the logged-in user from localStorage
-  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-  const userEmail = loggedInUser?.email;
+  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+  const userEmail = loggedInUser?.email || null;
 
   // Load tasks for the logged-in user on component mount
   useEffect(() => {
-    if (userEmail) {
-      const storedTasks = localStorage.getItem(`tasks_${userEmail}`);
-      if (storedTasks) {
-        setTasks(JSON.parse(storedTasks));
-      }
-    }
+    if (!userEmail) return; // Prevent running if no user is logged in
+
+    const storedTasks = localStorage.getItem(`tasks_${userEmail}`);
+    setTasks(storedTasks ? JSON.parse(storedTasks) : []);
     setIsLoading(false);
   }, [userEmail]);
 
@@ -74,6 +72,12 @@ const Dashboard = () => {
     });
   };
 
+  // Logout function that does not remove tasks
+  const handleLogout = () => {
+    localStorage.removeItem('loggedInUser'); // Keep tasks intact
+    window.location.reload();
+  };
+
   // Calculate statistics
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(task => task.completed).length;
@@ -92,6 +96,9 @@ const Dashboard = () => {
               <Clock className="h-3 w-3 mr-1" />
               <span>{new Date().toLocaleDateString()}</span>
             </Badge>
+            <button onClick={handleLogout} className="px-3 py-1 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700">
+              Logout
+            </button>
           </div>
         </div>
 
