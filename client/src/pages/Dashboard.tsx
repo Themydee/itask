@@ -96,9 +96,7 @@ const Dashboard = () => {
               <Clock className="h-3 w-3 mr-1" />
               <span>{new Date().toLocaleDateString()}</span>
             </Badge>
-            <button onClick={handleLogout} className="px-3 py-1 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700">
-              Logout
-            </button>
+           
           </div>
         </div>
 

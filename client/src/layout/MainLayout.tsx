@@ -26,11 +26,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     { href: '/dashboard', label: 'Dashboard' },
 
   ];
-
-  const handleLogout = () => {
-    window.location.href = '/';
-  };
-
+  
+// Logout function that does not remove tasks
+const handleLogout = () => {
+  localStorage.removeItem('loggedInUser'); // Keep tasks intact
+  window.location.reload();
+};
   return (
     <div className="min-h-screen flex flex-col bg-background overflow-hidden">
       {/* Header */}
