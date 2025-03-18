@@ -22,10 +22,12 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    resetPasswordToken: String,
-    resetPasswordExpiresAt: Date,
-    verificationToken: String,
-    verificationTokenExpiresAt: Date,
+    // resetPasswordToken: String, 
+    // resetPasswordExpiresAt: Date,
+    // verificationToken: String,
+    // verificationTokenExpiresAt: Date,
+
+    // the hashed comments are'nt needed now probably when updates are happening can now use password token and verification
 }, { timestamps: true });
 
-export const user = mongoose.model('User', userSchema);
+export const User = mongoose.model('User', userSchema);
