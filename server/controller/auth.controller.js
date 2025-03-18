@@ -2,54 +2,27 @@ import { User } from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
 
 export const signup = async (req, res) => {
-    const { name, email, password } = req.body;
-
     try {
-        // Check if all fields are provided
-        if (!email || !password || !name) {
-            return res.status(400).json({ success: false, message: "All fields are required" });
-        }
-
-        // Check if user already exists
-        const userAlreadyExists = await User.findOne({ email });
-        console.log("userAlreadyExists:", userAlreadyExists);
-
-        if (userAlreadyExists) {
-            return res.status(400).json({ success: false, message: "User Already Exists" });
-        }
-
-        // Hash the password
-        const hashedPassword = await bcryptjs.hash(password, 10);
-
-        // Correct instantiation of the User model
-        const user = new User({
-            name,
-            email,
-            password: hashedPassword,
-        });
-
-        // Save user to the database
-        await user.save();
-
-        // Return success response (excluding password)
-        res.status(201).json({
-            success: true,
-            message: "User Created Successfully",
-            user: {
-                ...user._doc,
-                password: undefined,
-            },
-        });
-
+      const { name, email, password } = req.body;
+  
+      if (!name || !email || !password) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+  
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+      
+      const hashedPassword = await bcryptjs.hash(password, 10);
+      const newUser = new User({ name, email, password: hashedPassword });
+      await newUser.save();
+  
+      res.status(201).json({ message: "User registered successfully", user: newUser });
     } catch (error) {
-        console.error("Signup Error:", error);  // Log error for debugging
-
-        res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-        });
+      res.status(500).json({ message: "Server error", error });
     }
-};
+  };
 
 
 
