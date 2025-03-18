@@ -1,31 +1,16 @@
-import express from 'express';
-import bodyParser from 'body-parser';   
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import route from "./routes/userRoutes.js"
-
-dotenv.config();
+import express from "express"
+import dotenv from "dotenv"
+dotenv.config()
+import { connectDB } from "./db/connectDB.js";
 
 const app = express();
-app.use(bodyParser.json());
 
+app.get("/", (req, res)=> {
+    res.send("Hello world123!")
+})  
 
+app.listen(3000, () => {
+    connectDB();
+    console.log("server is running on port 3000")
+})
 
-const PORT = process.env.PORT || 5000;
-const MONGOURL = process.env.MONGO_URL;
-
-if (!MONGOURL) {
-    console.error("Error: MONGO_URL is undefined. Check your .env file.");
-    process.exit(1); // Stop the server
-}
-
-mongoose.connect(MONGOURL).then(() => {
-    console.log('Database connected');   
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-    });   
-}).catch((err) => {
-    console.log(err);
-});
-
-app.use("/api", route)
