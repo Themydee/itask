@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut, Menu, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from "@/store/authStore";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -21,16 +23,18 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-
   const links = [
     { href: '/dashboard', label: 'Dashboard' },
 
   ];
+
+    const {logout} = useAuthStore();
+
+  const navigate = useNavigate();
   
 // Logout function that does not remove tasks
 const handleLogout = () => {
-  localStorage.removeItem('loggedInUser'); // Keep tasks intact
-  window.location.reload();
+  navigate('/auth');
 };
   return (
     <div className="min-h-screen flex flex-col bg-background overflow-hidden">

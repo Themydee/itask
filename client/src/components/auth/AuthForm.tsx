@@ -33,33 +33,55 @@ const AuthForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     try {
-      const response = await fetch("http://localhost:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-        credentials: "include",
-      });
-  
-      if (!response.ok) {
-        throw new Error("Failed to register");
+      let response;
+      if (mode === "register") {
+        response = await fetch("http://localhost:5000/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to register");
+        }
+
+        toast({ title: "Success", description: "Account created! Redirecting to login..." });
+
+        // ✅ Switch to login mode after successful registration
+        setTimeout(() => setMode("login"), 2000);
+      } 
+      else {
+        response = await fetch("http://localhost:5000/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to login");
+        }
+
+        const data = await response.json();
+
+        // ✅ Store user data in localStorage
+        localStorage.setItem("loggedInUser", JSON.stringify(data.user));
+        toast({ title: "Success", description: "Login successful! Redirecting..." });
+
+        // ✅ Redirect to dashboard after login
+        navigate("/dashboard");
       }
-  
-      const data = await response.json();
-      toast({ title: "Success", description: "Account created!" });
-      navigate('/dashboard');
     } catch (error) {
-      console.error("Signup error:", error);
-      toast({ title: "Error", description: "Failed to register", variant: "destructive" });
+      console.error("Auth error:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('loggedInUser');
-    window.location.href = '/';
   };
 
   return (
