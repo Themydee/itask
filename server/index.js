@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json()); 
 app.use(cookieParser()); 
 app.use(cors({
-    origin: "http://localhost:8080",  
+    origin: "https://itask-3udi.vercel.app",  
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
