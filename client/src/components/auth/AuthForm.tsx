@@ -37,7 +37,7 @@ const AuthForm = () => {
     try {
       let response;
       if (mode === "register") {
-        response = await fetch("http://localhost:5000/api/auth/signup", {
+        response = await fetch("https://itask-3udi.vercel.app/api/auth/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, email, password }),
@@ -55,7 +55,7 @@ const AuthForm = () => {
         setTimeout(() => setMode("login"), 2000);
       } 
       else {
-        response = await fetch("http://localhost:5000/api/auth/login", {
+        response = await fetch("https://itask-3udi.vercel.app/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
