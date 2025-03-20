@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast"; // Ensure correct toast hook import
+import { toast } from "@/components/ui/use-toast";
 import { useAuthStore } from "@/store/authStore";
 import { useNavigate } from 'react-router-dom';
+
+
 
 type AuthMode = 'login' | 'register';
 
@@ -17,18 +19,12 @@ const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { signup } = useAuthStore(); // Ensure this is correctly implemented in authStore
 
-  // Redirect if user is already logged in
-  useEffect(() => {
-    if (localStorage.getItem("loggedInUser")) {
-      navigate("/dashboard");
-    }
-  }, [navigate]);
+  const {signup} = useAuthStore();
 
   const toggleMode = () => {
     setMode(mode === 'login' ? 'register' : 'login');
+    // Reset form fields when switching modes
     setEmail('');
     setPassword('');
     setName('');
@@ -41,7 +37,7 @@ const AuthForm = () => {
     try {
       let response;
       if (mode === "register") {
-        response = await fetch("https://itask-sekd.vercel.app/api/auth/signup", {
+        response = await fetch("https://itask-3udi.vercel.app/api/auth/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, email, password }),
@@ -55,11 +51,11 @@ const AuthForm = () => {
 
         toast({ title: "Success", description: "Account created! Redirecting to login..." });
 
-        // Redirect to login after 2 seconds
-        setTimeout(() => navigate("/login"), 2000);
+        // ✅ Switch to login mode after successful registration
+        setTimeout(() => setMode("login"), 2000);
       } 
       else {
-        response = await fetch("https://itask-sekd.vercel.app/api/auth/login", {
+        response = await fetch("https://itask-3udi.vercel.app/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
@@ -73,16 +69,16 @@ const AuthForm = () => {
 
         const data = await response.json();
 
-        // Store user data in localStorage
+        // ✅ Store user data in localStorage
         localStorage.setItem("loggedInUser", JSON.stringify(data.user));
         toast({ title: "Success", description: "Login successful! Redirecting..." });
 
-        // Redirect to dashboard after login
+        // ✅ Redirect to dashboard after login
         navigate("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Auth error:", error);
-      toast({ title: "Error", description: error.message || "Something went wrong", variant: "destructive" });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
