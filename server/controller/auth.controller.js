@@ -1,5 +1,6 @@
 import { User } from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
     try {
@@ -26,37 +27,58 @@ export const signup = async (req, res) => {
 
 
 
-export const login = async (req, res) => {
+  export const login = async (req, res) => {
     const { email, password } = req.body;
-    try{
-        const user = await User.findOne({email});
-        if(!user){
-            return res.status(400).json({success: false, message: "Invalid credentials"});
-        } 
-
-        const isPasswordCorrect = await bcryptjs.compare(password, user.password);
-        if(!isPasswordCorrect){
-            return res.status(400).json({success: false, message: "Invalid credentials"});
+    
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ success: false, message: "Invalid credentials" });
         }
 
+        const isPasswordCorrect = await bcryptjs.compare(password, user.password);
+        if (!isPasswordCorrect) {
+            return res.status(400).json({ success: false, message: "Invalid credentials" });
+        }
+
+        // ✅ **Generate JWT Token**
+        const token = jwt.sign(
+            { userId: user._id }, 
+            process.env.JWT_SECRET_KEY, 
+            { expiresIn: "7d" } // Token valid for 7 days
+        );
+
+        // ✅ **Set Cookie with Token**
+        res.cookie("token", token, {
+            httpOnly: true, // Prevents client-side access (security best practice)
+            secure: process.env.NODE_ENV === "production", // Only HTTPS in production
+            sameSite: "Strict", // Prevents CSRF attacks
+        });
+
+        // ✅ **Update last login time**
         user.lastLogin = new Date();
         await user.save();
 
         res.status(200).json({
-            success: true, 
-            message: "User logged in successfully", 
+            success: true,
+            message: "User logged in successfully",
+            token, // Send token in response for clients using headers
             user: {
-                ...user._doc,
-                password: undefined
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                lastLogin: user.lastLogin
             }
         });
-    } catch (error){
-        console.log("Login Error:", error);
-        res.status(500).json({success: false, message: "Internal Server Error"});
+
+    } catch (error) {
+        console.error("Login Error:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
 
 export const logout = async (req, res) => {
-    res.status(200).json({ success: true, message: "User logged out" });
-}
+  res.clearCookie("token"); // Remove token
+  res.status(200).json({ success: true, message: "User logged out successfully" });
+};
 
