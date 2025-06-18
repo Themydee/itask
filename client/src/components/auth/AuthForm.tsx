@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from "@/components/ui/use-toast";
 import { useAuthStore } from "@/store/authStore";
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'
+import { serverUrl } from '@/App';
 
 
 
@@ -34,53 +36,84 @@ const AuthForm = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    // try {
+    //   let response;
+    //   if (mode === "register") {
+    //     response = await fetch(`${serverUrl}/api/auth/signup`, {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({ name, email, password }),
+    //       credentials: "include",
+    //     });
+
+    //     if (!response.ok) {
+    //       const errorData = await response.json();
+    //       throw new Error(errorData.message || "Failed to register");
+    //     }
+
+    //     toast({ title: "Success", description: "Account created! Redirecting to login..." });
+
+    //     // ✅ Switch to login mode after successful registration
+    //     setTimeout(() => setMode("login"), 2000);
+    //   } 
+    //   else {
+    //     response = await fetch(`${serverUrl}/api/auth/login`, {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({ email, password }),
+    //       credentials: "include",
+    //     });
+
+    //     if (!response.ok) {
+    //       const errorData = await response.json();
+    //       throw new Error(errorData.message || "Failed to login");
+    //     }
+
+    //     const data = await response.json();
+
+    //     // ✅ Store user data in localStorage
+    //     localStorage.setItem("loggedInUser", JSON.stringify(data.user));
+    //     toast({ title: "Success", description: "Login successful! Redirecting..." });
+
+    //     // ✅ Redirect to dashboard after login
+    //     navigate("/dashboard");
+    //   }
+    // } catch (error) {
+    //   console.error("Auth error:", error);
+    //   toast({ title: "Error", description: error.message, variant: "destructive" });
+    // } finally {
+    //   setIsLoading(false);
+    // }
+
     try {
-      let response;
-      if (mode === "register") {
-        response = await fetch("https://itask-3udi.vercel.app/api/auth/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to register");
-        }
-
-        toast({ title: "Success", description: "Account created! Redirecting to login..." });
-
-        // ✅ Switch to login mode after successful registration
-        setTimeout(() => setMode("login"), 2000);
-      } 
-      else {
-        response = await fetch("https://itask-3udi.vercel.app/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to login");
-        }
-
-        const data = await response.json();
-
-        // ✅ Store user data in localStorage
-        localStorage.setItem("loggedInUser", JSON.stringify(data.user));
-        toast({ title: "Success", description: "Login successful! Redirecting..." });
-
-        // ✅ Redirect to dashboard after login
-        navigate("/dashboard");
-      }
-    } catch (error) {
-      console.error("Auth error:", error);
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } finally {
+      const response = mode === 'register'
+        ? await axios.post(`${serverUrl}/api/auth/signup`, { name, email, password }, { withCredentials: true })
+        : await axios.post(`${serverUrl}/api/auth/login`, { email, password }, { withCredentials: true });
       setIsLoading(false);
+      if (response.status < 200 || response.status >= 300) {
+    throw new Error(response.data.message || 'Authentication failed');
+  }
+      const data = response.data;
+      if (mode === 'register') {
+        toast({ title: 'Success', description: 'Account created! Redirecting to login...' });
+        setTimeout(() => setMode('login'), 2000);
+      }
+      else {
+        // Store user data in the auth store
+        signup(data.user);
+        toast({ title: 'Success', description: 'Login successful! Redirecting to dashboard...' });
+        // Redirect to dashboard
+        navigate('/dashboard');
+      }
+
+    } catch (error) {
+      console.error('Authentication error:', error);
+      setIsLoading(false);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+        variant: 'destructive',
+      });
     }
   };
 

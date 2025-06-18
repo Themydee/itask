@@ -9,6 +9,8 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
+
+export const serverUrl = import.meta.env.VITE_SERVER_URL
 const queryClient = new QueryClient();
 
 const App = () => (

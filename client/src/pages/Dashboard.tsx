@@ -78,6 +78,8 @@ const Dashboard = () => {
     window.location.reload();
   };
 
+  const API_URL = "http://localhost:5000/api/tasks";
+
   // Calculate statistics
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(task => task.completed).length;
